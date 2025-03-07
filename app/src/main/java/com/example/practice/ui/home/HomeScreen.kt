@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,9 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.practice.R
-import com.example.practice.ui.navigation.BottomBar
 import com.example.practice.ui.product.ProductData
 import com.example.practice.ui.product.ProductList
 
@@ -37,7 +34,7 @@ fun HomeScreen(navController: NavController) {
     // Quản lý danh mục đang chọn ở HomeScreen
     var selectedCategory by remember { mutableStateOf("All") }
 
-    Column(modifier = Modifier.padding(20.dp)) {
+    Column{
         Box(
             modifier = Modifier.weight(0.13f)
         ) {
@@ -92,7 +89,7 @@ fun HomeScreen(navController: NavController) {
                 allProducts.filter { it.category == selectedCategory }
             }
 
-            ProductList(products = filteredProducts)
+            ProductList(products = filteredProducts, navController)
         }
     }
 }
@@ -112,7 +109,7 @@ fun FilterCategory(
             FilterChip(
                 selected = isSelected,
                 onClick = { onCategorySelected(category) },
-                label = { Text(category) },
+                label = { Text(category, fontSize = 16.sp) },
                 modifier = Modifier.padding(8.dp),
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = Color.Black,

@@ -11,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,58 +31,66 @@ import androidx.navigation.NavController
 fun BottomBar(navController: NavController) {
     var selectedTab by remember { mutableStateOf("home") }
 
-    Row(
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White),
-        horizontalArrangement = Arrangement.SpaceEvenly
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        BottomBarItem(
-            icon = Icons.Default.Home,
-            label = "Home",
-            isSelected = selectedTab == "home",
-            onClick = {
-                if (selectedTab != "home") {
-                    selectedTab = "home"
-                    navController.navigate("home") {
-                        launchSingleTop = true
-                        popUpTo("home") { inclusive = true }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(end = 20.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            BottomBarItem(
+                icon = Icons.Default.Home,
+                label = "Home",
+                isSelected = selectedTab == "home",
+                onClick = {
+                    if (selectedTab != "home") {
+                        selectedTab = "home"
+                        navController.navigate("home") {
+                            launchSingleTop = true
+                            popUpTo("home") { inclusive = true }
+                        }
                     }
                 }
-            }
-        )
+            )
 
-        BottomBarItem(
-            icon = Icons.Default.AccessTime,
-            label = "History",
-            isSelected = selectedTab == "history",
-            onClick = {
-                if (selectedTab != "history") {
-                    selectedTab = "history"
-                    navController.navigate("history") {
-                        launchSingleTop = true
-                        popUpTo("home") { inclusive = true }
+            BottomBarItem(
+                icon = Icons.Default.AccessTime,
+                label = "History",
+                isSelected = selectedTab == "history",
+                onClick = {
+                    if (selectedTab != "history") {
+                        selectedTab = "history"
+                        navController.navigate("history") {
+                            launchSingleTop = true
+                            popUpTo("home") { inclusive = true }
+                        }
                     }
                 }
-            }
-        )
+            )
 
-        BottomBarItem(
-            icon = Icons.Default.Person,
-            label = "Me",
-            isSelected = selectedTab == "me",
-            onClick = {
-                if (selectedTab != "me") {
-                    selectedTab = "me"
-                    navController.navigate("me") {
-                        launchSingleTop = true
-                        popUpTo("home") { inclusive = true }
+            BottomBarItem(
+                icon = Icons.Default.Person,
+                label = "Me",
+                isSelected = selectedTab == "me",
+                onClick = {
+                    if (selectedTab != "me") {
+                        selectedTab = "me"
+                        navController.navigate("me") {
+                            launchSingleTop = true
+                            popUpTo("home") { inclusive = true }
+                        }
                     }
                 }
-            }
-        )
+            )
+        }
     }
 }
+
 
 @Composable
 fun BottomBarItem(icon: ImageVector, label: String, isSelected: Boolean, onClick: () -> Unit) {

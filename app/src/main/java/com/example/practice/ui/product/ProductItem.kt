@@ -24,10 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun ProductItem(product: ProductData) {
+fun ProductItem(product: ProductData, navController: NavController) {
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -45,7 +46,7 @@ fun ProductItem(product: ProductData) {
             Text(
                 text = product.name,
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
+                fontSize = 18.sp,
                 modifier = Modifier.constrainAs(title) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
@@ -55,7 +56,7 @@ fun ProductItem(product: ProductData) {
 
             Text(
                 text = product.category,
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier.constrainAs(category) {
                     top.linkTo(title.bottom, margin = 4.dp)
@@ -81,7 +82,7 @@ fun ProductItem(product: ProductData) {
             Text(
                 text = "$${product.price}",
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 modifier = Modifier.constrainAs(price) {
                     top.linkTo(image.bottom, margin = 12.dp)
                     start.linkTo(parent.start)
@@ -90,7 +91,7 @@ fun ProductItem(product: ProductData) {
             )
 
             Button(
-                onClick = {  },
+                onClick = { navController.navigate("orderScreen/${product.id}") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -105,6 +106,7 @@ fun ProductItem(product: ProductData) {
             ) {
                 Text(
                     text = "Buy",
+                    fontSize = 16.sp,
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
