@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(navController: NavController, modifier: Modifier = Modifier) {
     var selectedTab by remember { mutableStateOf("home") }
 
     Card(
@@ -52,7 +52,8 @@ fun BottomBar(navController: NavController) {
                         selectedTab = "home"
                         navController.navigate("home") {
                             launchSingleTop = true
-                            popUpTo("home") { inclusive = true }
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            restoreState = true
                         }
                     }
                 }
@@ -67,7 +68,8 @@ fun BottomBar(navController: NavController) {
                         selectedTab = "history"
                         navController.navigate("history") {
                             launchSingleTop = true
-                            popUpTo("home") { inclusive = true }
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            restoreState = true
                         }
                     }
                 }
@@ -82,7 +84,8 @@ fun BottomBar(navController: NavController) {
                         selectedTab = "me"
                         navController.navigate("me") {
                             launchSingleTop = true
-                            popUpTo("home") { inclusive = true }
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            restoreState = true
                         }
                     }
                 }

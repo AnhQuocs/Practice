@@ -91,7 +91,7 @@ fun ProductItem(product: ProductData, navController: NavController) {
             )
 
             Button(
-                onClick = { navController.navigate("orderScreen/${product.id}") },
+                onClick = { navController.navigate("order/${product.id}") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)),
                 modifier = Modifier
                     .fillMaxWidth()
