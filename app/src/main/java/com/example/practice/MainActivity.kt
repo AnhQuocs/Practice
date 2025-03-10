@@ -26,6 +26,7 @@ import com.example.practice.ui.account.SignUpScreen
 import com.example.practice.ui.home.HomeScreen
 import com.example.practice.ui.navigation.BottomBar
 import com.example.practice.ui.product.HistoryScreen
+import com.example.practice.ui.product.address.AddressViewModel
 import com.example.practice.ui.product.order.OrderScreen
 import com.example.practice.ui.product.order.OrderViewModel
 import com.example.practice.ui.theme.PracticeTheme
@@ -89,7 +90,8 @@ fun MainApp(modifier: Modifier = Modifier) {
                 ) {
                     backStackEntry ->
                     val productId = backStackEntry.arguments?.getInt("productId") ?:0
-                    OrderScreen(productId = productId, orderViewModel)
+                    val addressViewModel: AddressViewModel = viewModel()
+                    OrderScreen(productId = productId, orderViewModel, addressViewModel)
                 }
 
                 composable(

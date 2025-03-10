@@ -49,10 +49,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.practice.R
 import com.example.practice.ui.product.ProductData
+import com.example.practice.ui.product.address.Address
+import com.example.practice.ui.product.address.AddressSaver
+import com.example.practice.ui.product.address.AddressViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun OrderScreen(productId: Int, viewModel: OrderViewModel) {
+fun OrderScreen(productId: Int, viewModel: OrderViewModel, addressViewModel: AddressViewModel) {
     val productList = listOf(
         ProductData(20, "BABI YAR", "Book", 9.99f, R.drawable.book_2),
         ProductData(2, "Pancakes", "Food", 3.99f, R.drawable.food_1),
@@ -79,16 +82,16 @@ fun OrderScreen(productId: Int, viewModel: OrderViewModel) {
     )
     val product = productList.find { it.id == productId } ?: return
 
-    OrderItems(product, viewModel)
+    OrderItems(product, viewModel, addressViewModel)
 }
 
 @Composable
-fun OrderItems(product: ProductData, viewModel: OrderViewModel) {
+fun OrderItems(product: ProductData, viewModel: OrderViewModel, addressViewModel: AddressViewModel) {
     val countQuantity = remember { mutableStateOf("1") }
     val totalPrice = remember { mutableStateOf(product.price) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var showSnackbar by remember { mutableStateOf(false) }
+    var address by remember { mutableStateOf(addressViewModel.address) }
 
     Scaffold (
         snackbarHost = { SnackbarHost(hostState = snackbarHostState)}
@@ -226,26 +229,22 @@ fun OrderItems(product: ProductData, viewModel: OrderViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            var country by rememberSaveable() { mutableStateOf("") }
-            var city by rememberSaveable() { mutableStateOf("") }
-            var district by rememberSaveable() { mutableStateOf("") }
-            var ward by rememberSaveable() { mutableStateOf("") }
-            var concrete by rememberSaveable() { mutableStateOf("") }
-
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 if(product.category == "Food") {
-                    OrderTextField("City", city, onValueChange = { city = it }, "City", Icons.Default.LocationOn)
-                    OrderTextField("District", district, onValueChange = { district = it }, "District", Icons.Default.LocationOn)
-                    OrderTextField("Ward", ward, onValueChange = { ward = it }, "Ward", Icons.Default.LocationOn)
-                    OrderTextField("Specific address", concrete, onValueChange = { concrete = it }, "Specific address", Icons.Default.LocationOn)
+                    OrderTextField("City", address.city, onValueChange = { address = address.copy(city = it) }, "City", Icons.Default.LocationOn)
+                    OrderTextField("District", address.district, onValueChange = { address = address.copy(district = it) }, "District", Icons.Default.LocationOn)
+                    OrderTextField("Ward", address.ward, onValueChange = { address = address.copy(ward = it) }, "Ward", Icons.Default.LocationOn)
+                    OrderTextField("Specific address", address.concrete, onValueChange = { address = address.copy(concrete = it) }, "Specific address", Icons.Default.LocationOn)
+
                 } else {
-                    OrderTextField("Country", country, onValueChange = { country = it }, "Country", Icons.Default.LocationOn)
-                    OrderTextField("City", city, onValueChange = { city = it }, "City", Icons.Default.LocationOn)
-                    OrderTextField("District", district, onValueChange = { district = it }, "District", Icons.Default.LocationOn)
-                    OrderTextField("Ward", ward, onValueChange = { ward = it }, "Ward", Icons.Default.LocationOn)
-                    OrderTextField("Specific address", concrete, onValueChange = { concrete = it }, "Specific address", Icons.Default.LocationOn)
+                    OrderTextField("Country", address.country, onValueChange = { address = address.copy(country = it) }, "Country", Icons.Default.LocationOn)
+                    OrderTextField("City", address.city, onValueChange = { address = address.copy(city = it) }, "City", Icons.Default.LocationOn)
+                    OrderTextField("District", address.district, onValueChange = { address = address.copy(district = it) }, "District", Icons.Default.LocationOn)
+                    OrderTextField("Ward", address.ward, onValueChange = { address = address.copy(ward = it) }, "Ward", Icons.Default.LocationOn)
+                    OrderTextField("Specific address", address.concrete, onValueChange = { address = address.copy(concrete = it) }, "Specific address", Icons.Default.LocationOn)
+
                 }
             }
 
@@ -266,7 +265,7 @@ fun OrderItems(product: ProductData, viewModel: OrderViewModel) {
 
                 Button(
                     onClick = {
-                        if(city.isEmpty() || district.isEmpty() || ward.isEmpty() || concrete.isEmpty() || (product.category != "Food" && country.isEmpty())) {
+                        if(address.city.isEmpty() || address.district.isEmpty() || address.ward.isEmpty() || address.concrete.isEmpty() || (product.category != "Food" && address.country.isEmpty())) {
                             scope.launch {
                                 snackbarHostState.showSnackbar("Please enter complete information!")
                             }
