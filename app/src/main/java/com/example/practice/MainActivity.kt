@@ -27,6 +27,7 @@ import com.example.practice.ui.home.HomeScreen
 import com.example.practice.ui.navigation.BottomBar
 import com.example.practice.ui.product.HistoryScreen
 import com.example.practice.ui.product.address.AddressViewModel
+import com.example.practice.ui.product.order.OrderDetail
 import com.example.practice.ui.product.order.OrderScreen
 import com.example.practice.ui.product.order.OrderViewModel
 import com.example.practice.ui.theme.PracticeTheme
@@ -46,11 +47,12 @@ fun MainApp(modifier: Modifier = Modifier) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route // Lấy route hiện tại
 
     val orderViewModel: OrderViewModel = viewModel()
+    val addressViewModel: AddressViewModel = viewModel()
 
     PracticeTheme {
         Column(modifier = modifier.fillMaxSize().padding(top = 12.dp, bottom = 12.dp)) {
             // Điều hướng đến các màn hình trong NavHost
-            NavHost(navController = navController, startDestination = "home", modifier = modifier.weight(1f)) {
+            NavHost(navController = navController, startDestination = "signUp", modifier = modifier.weight(1f)) {
                 composable("login") {
                     LoginScreen(
                         loginClick = { navController.navigate("home") },
@@ -90,19 +92,27 @@ fun MainApp(modifier: Modifier = Modifier) {
                 ) {
                     backStackEntry ->
                     val productId = backStackEntry.arguments?.getInt("productId") ?:0
-                    val addressViewModel: AddressViewModel = viewModel()
                     OrderScreen(productId = productId, orderViewModel, addressViewModel)
                 }
 
                 composable(
                     "history",
-                    enterTransition = { slideInHorizontally(initialOffsetX = { it }) },  // History lướt từ phải vào
-                    exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },  // Khi sang Me, History lướt sang trái
-                    popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) }, // Khi quay lại từ Me, History lướt từ trái vào
+//                    enterTransition = { slideInHorizontally(initialOffsetX = { it }) },  // History lướt từ phải vào
+//                    exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },  // Khi sang Me, History lướt sang trái
+//                    popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) }, // Khi quay lại từ Me, History lướt từ trái vào
                     popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }    // Khi quay lại Home, History lướt sang phải
                     ) {
                     HistoryScreen(navController, orderViewModel)
                 }
+
+                composable(
+                    "detail/{productId}",
+                    arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                    OrderDetail(navController, orderViewModel, addressViewModel, productId)
+                }
+
             }
 
             if(currentRoute == "home" || currentRoute == "history" || currentRoute == "me") {

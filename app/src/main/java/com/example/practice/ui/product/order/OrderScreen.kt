@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
@@ -30,19 +32,23 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +56,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.practice.R
 import com.example.practice.ui.product.ProductData
 import com.example.practice.ui.product.address.Address
-import com.example.practice.ui.product.address.AddressSaver
 import com.example.practice.ui.product.address.AddressViewModel
 import kotlinx.coroutines.launch
 
@@ -91,7 +96,13 @@ fun OrderItems(product: ProductData, viewModel: OrderViewModel, addressViewModel
     val totalPrice = remember { mutableStateOf(product.price) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var address by remember { mutableStateOf(addressViewModel.address) }
+    val address by remember { derivedStateOf { addressViewModel.getAddress(product.id) } }
+    val tempAddress = remember { mutableStateOf(address) }
+
+    LaunchedEffect(address) {
+        tempAddress.value = address
+    }
+
 
     Scaffold (
         snackbarHost = { SnackbarHost(hostState = snackbarHostState)}
@@ -229,22 +240,27 @@ fun OrderItems(product: ProductData, viewModel: OrderViewModel, addressViewModel
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            val focusRequesterList = List(5) { FocusRequester() }
+
             Column(
                 modifier = Modifier.weight(1f)
+
             ) {
-                if(product.category == "Food") {
-                    OrderTextField("City", address.city, onValueChange = { address = address.copy(city = it) }, "City", Icons.Default.LocationOn)
-                    OrderTextField("District", address.district, onValueChange = { address = address.copy(district = it) }, "District", Icons.Default.LocationOn)
-                    OrderTextField("Ward", address.ward, onValueChange = { address = address.copy(ward = it) }, "Ward", Icons.Default.LocationOn)
-                    OrderTextField("Specific address", address.concrete, onValueChange = { address = address.copy(concrete = it) }, "Specific address", Icons.Default.LocationOn)
+                LaunchedEffect(Unit) {
+                    tempAddress.value = Address() // Gán lại giá trị mặc định
+                }
 
+                if (product.category == "Food") {
+                    OrderTextField("City", tempAddress.value.city, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(city = newValue) }, "City", Icons.Default.LocationOn, focusRequesterList[0], focusRequesterList[1])
+                    OrderTextField("District", tempAddress.value.district, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(district = newValue) }, "District", Icons.Default.LocationOn, focusRequesterList[1], focusRequesterList[2])
+                    OrderTextField("Ward", tempAddress.value.ward, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(ward = newValue) }, "Ward", Icons.Default.LocationOn, focusRequesterList[2], focusRequesterList[3])
+                    OrderTextField("Specific address", tempAddress.value.concrete, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(concrete = newValue) }, "Specific address", Icons.Default.LocationOn, focusRequesterList[3])
                 } else {
-                    OrderTextField("Country", address.country, onValueChange = { address = address.copy(country = it) }, "Country", Icons.Default.LocationOn)
-                    OrderTextField("City", address.city, onValueChange = { address = address.copy(city = it) }, "City", Icons.Default.LocationOn)
-                    OrderTextField("District", address.district, onValueChange = { address = address.copy(district = it) }, "District", Icons.Default.LocationOn)
-                    OrderTextField("Ward", address.ward, onValueChange = { address = address.copy(ward = it) }, "Ward", Icons.Default.LocationOn)
-                    OrderTextField("Specific address", address.concrete, onValueChange = { address = address.copy(concrete = it) }, "Specific address", Icons.Default.LocationOn)
-
+                    OrderTextField("Country", tempAddress.value.country, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(country = newValue)}, "Country", Icons.Default.LocationOn, focusRequesterList[0], focusRequesterList[1])
+                    OrderTextField("City", tempAddress.value.city, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(city = newValue) }, "City", Icons.Default.LocationOn, focusRequesterList[1], focusRequesterList[2])
+                    OrderTextField("District", tempAddress.value.district, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(district = newValue) }, "District", Icons.Default.LocationOn, focusRequesterList[2], focusRequesterList[3])
+                    OrderTextField("Ward", tempAddress.value.ward, onValueChange = {newValue -> tempAddress.value = tempAddress.value.copy(ward = newValue) }, "Ward", Icons.Default.LocationOn, focusRequesterList[3], focusRequesterList[4])
+                    OrderTextField("Specific address", tempAddress.value.concrete, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(concrete = newValue) }, "Specific address", Icons.Default.LocationOn, focusRequesterList[4])
                 }
             }
 
@@ -265,15 +281,24 @@ fun OrderItems(product: ProductData, viewModel: OrderViewModel, addressViewModel
 
                 Button(
                     onClick = {
-                        if(address.city.isEmpty() || address.district.isEmpty() || address.ward.isEmpty() || address.concrete.isEmpty() || (product.category != "Food" && address.country.isEmpty())) {
+                        if (tempAddress.value.city.isEmpty() || tempAddress.value.district.isEmpty() || tempAddress.value.ward.isEmpty() ||
+                            tempAddress.value.concrete.isEmpty() || (product.category != "Food" && tempAddress.value.country.isEmpty())
+                        ) {
                             scope.launch {
                                 snackbarHostState.showSnackbar("Please enter complete information!")
                             }
                         } else {
+                            // ✅ Lưu địa chỉ vào ViewModel chỉ khi ấn Order
+                            addressViewModel.updateAddress(product.id, tempAddress.value)
+
+                            // ✅ Thêm đơn hàng
                             viewModel.addOrder(product, countQuantity.value.toInt())
+
                             scope.launch {
                                 snackbarHostState.showSnackbar("Order placed successfully!")
                             }
+
+                            tempAddress.value = Address("", "", "", "", "")
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)),
@@ -284,6 +309,7 @@ fun OrderItems(product: ProductData, viewModel: OrderViewModel, addressViewModel
                 ) {
                     Text(text = "Order", fontSize = 18.sp)
                 }
+
             }
         }
     }
@@ -295,7 +321,9 @@ fun OrderTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    icon: ImageVector
+    icon: ImageVector,
+    focusRequester: FocusRequester,
+    nextFocusRequester: FocusRequester? = null
 ) {
     var isError by remember { mutableStateOf(false) }
 
@@ -322,7 +350,14 @@ fun OrderTextField(
             leadingIcon = {
                 Icon(imageVector = icon, contentDescription = null, tint = Color(0xFF33CC66))
             },
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { nextFocusRequester?.requestFocus() }
+            ),
+            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
             shape = MaterialTheme.shapes.medium,
             isError = isError
         )

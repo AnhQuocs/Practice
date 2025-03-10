@@ -66,7 +66,7 @@ fun HistoryScreen(navController: NavController, orderViewModel: OrderViewModel) 
         } else {
             LazyColumn {
                 items(orderHistory) { order ->
-                    OrderItemCard(order)
+                    OrderItemCard(navController, order)
                 }
             }
         }
@@ -74,7 +74,7 @@ fun HistoryScreen(navController: NavController, orderViewModel: OrderViewModel) 
 }
 
 @Composable
-fun OrderItemCard(order: OrderItem) {
+fun OrderItemCard(navController: NavController, order: OrderItem) {
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -137,7 +137,7 @@ fun OrderItemCard(order: OrderItem) {
             )
 
             Text(
-                text = "Price: $${order.product.price}",
+                text = "Price: $${"%.2f".format(order.product.price)}",
                 modifier = Modifier.constrainAs(price) {
                     start.linkTo(name.start)
                     top.linkTo(category.bottom, margin = 4.dp)
@@ -154,7 +154,9 @@ fun OrderItemCard(order: OrderItem) {
             )
 
             Button(
-                onClick = {},
+                onClick = {
+                    navController.navigate("detail/${order.product.id}")
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)),
                 modifier = Modifier
                     .wrapContentSize()
