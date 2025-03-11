@@ -23,6 +23,7 @@ import androidx.navigation.navArgument
 import com.example.practice.ui.account.AccountScreen
 import com.example.practice.ui.account.LoginScreen
 import com.example.practice.ui.account.SignUpScreen
+import com.example.practice.ui.account.user.UserViewModel
 import com.example.practice.ui.home.HomeScreen
 import com.example.practice.ui.navigation.BottomBar
 import com.example.practice.ui.product.HistoryScreen
@@ -46,15 +47,17 @@ fun MainApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController() // Tạo navController cho điều hướng
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route // Lấy route hiện tại
 
+    val userViewModel: UserViewModel = viewModel()
     val orderViewModel: OrderViewModel = viewModel()
     val addressViewModel: AddressViewModel = viewModel()
 
     PracticeTheme {
         Column(modifier = modifier.fillMaxSize().padding(top = 12.dp, bottom = 12.dp)) {
             // Điều hướng đến các màn hình trong NavHost
-            NavHost(navController = navController, startDestination = "signUp", modifier = modifier.weight(1f)) {
+            NavHost(navController = navController, startDestination = "home", modifier = modifier.weight(1f)) {
                 composable("login") {
                     LoginScreen(
+                        userViewModel = userViewModel,
                         loginClick = { navController.navigate("home") },
                         navSignUp = { navController.navigate("signUp") }
                     )
@@ -62,7 +65,11 @@ fun MainApp(modifier: Modifier = Modifier) {
 
                 composable("signUp") {
                     SignUpScreen(
-                        signUpClick = { navController.navigate("home") },
+                        userViewModel = userViewModel,
+                        signUpClick = { navController.navigate("home") {
+                            popUpTo("signUp") { inclusive = true }
+                        }
+                        },
                         navLogIn = { navController.navigate("login") }
                     )
                 }

@@ -1,5 +1,6 @@
 package com.example.practice.ui.account
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -30,10 +33,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -41,11 +47,16 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.practice.R
+import com.example.practice.ui.account.user.UserData
+import com.example.practice.ui.account.user.UserViewModel
 
 @Composable
-fun LoginScreen(loginClick: () -> Unit, navSignUp: () -> Unit) {
+fun LoginScreen(userViewModel: UserViewModel, loginClick: () -> Unit, navSignUp: () -> Unit) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+
+    val emailFocus = remember { FocusRequester() }
+    val passwordFocus = remember { FocusRequester() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -74,10 +85,14 @@ fun LoginScreen(loginClick: () -> Unit, navSignUp: () -> Unit) {
                 .weight(0.7f)
                 .fillMaxWidth()
         ) {
-            EmailTextField(email = email, onEmailChange = { email = it })
-            PasswordTextField(password = password, onPasswordChange = { password = it })
+            EmailTextField(email = email, onEmailChange = { email = it }, focusRequester = emailFocus, nextFocus = passwordFocus)
+            PasswordTextField(password = password, onPasswordChange = { password = it }, focusRequester = passwordFocus, nextFocus = null)
             Spacer(modifier = Modifier.height(28.dp))
-            LoginButton(loginClick)
+
+            val newUser = UserData(email, password)
+            Log.d("frank", "User Data: $newUser") // Log kiểm tra dữ liệu
+
+            LoginButton(userViewModel, loginClick, email, password)
             NewAccount(navSignUp)
         }
     }
@@ -93,7 +108,7 @@ fun WelcomeText(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun EmailTextField(email: String, onEmailChange: (String) -> Unit) {
+fun EmailTextField(email: String, onEmailChange: (String) -> Unit, focusRequester: FocusRequester, nextFocus: FocusRequester?) {
     Column() {
         Text(
             "Email Address",
@@ -114,14 +129,19 @@ fun EmailTextField(email: String, onEmailChange: (String) -> Unit) {
                     tint = Color(0xFF33CC66)
                 )
             },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium
+            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+            shape = MaterialTheme.shapes.medium,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { nextFocus?.requestFocus() } // Chuyển focus khi nhấn Next
+            ),
+            singleLine = true
         )
     }
 }
 
 @Composable
-fun PasswordTextField(password: String, onPasswordChange: (String) -> Unit) {
+fun PasswordTextField(password: String, onPasswordChange: (String) -> Unit, focusRequester: FocusRequester, nextFocus: FocusRequester?) {
     var isShowPassword by remember { mutableStateOf(false) }
     Column {
         Text(
@@ -154,17 +174,30 @@ fun PasswordTextField(password: String, onPasswordChange: (String) -> Unit) {
                     )
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
             shape = MaterialTheme.shapes.medium,
-            visualTransformation = if(isShowPassword) VisualTransformation.None else PasswordVisualTransformation()
+            visualTransformation = if(isShowPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = { nextFocus?.requestFocus() } // Chuyển focus khi nhấn Next
+            ),
+            singleLine = true
         )
     }
 }
 
 @Composable
-fun LoginButton(loginClick: () -> Unit) {
+fun LoginButton(userViewModel: UserViewModel, loginClick: () -> Unit, email: String, password: String) {
+    var errorMessage by rememberSaveable { mutableStateOf("") }
+
     Button(
-        onClick = {loginClick()},
+        onClick = {
+            if (userViewModel.checkUser(email, password)) {
+                loginClick()
+            } else {
+                errorMessage = "Email or password is not correct"
+            }
+        },
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF33CC66)
         )
@@ -174,6 +207,15 @@ fun LoginButton(loginClick: () -> Unit) {
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
             modifier = Modifier.padding(0.dp, 8.dp).fillMaxWidth()
+        )
+    }
+
+    if (errorMessage.isNotEmpty()) {
+        Text(
+            text = errorMessage,
+            color = Color.Red,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }

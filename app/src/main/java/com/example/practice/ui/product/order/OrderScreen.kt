@@ -250,18 +250,13 @@ fun OrderItems(product: ProductData, viewModel: OrderViewModel, addressViewModel
                     tempAddress.value = Address() // Gán lại giá trị mặc định
                 }
 
-                if (product.category == "Food") {
-                    OrderTextField("City", tempAddress.value.city, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(city = newValue) }, "City", Icons.Default.LocationOn, focusRequesterList[0], focusRequesterList[1])
-                    OrderTextField("District", tempAddress.value.district, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(district = newValue) }, "District", Icons.Default.LocationOn, focusRequesterList[1], focusRequesterList[2])
-                    OrderTextField("Ward", tempAddress.value.ward, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(ward = newValue) }, "Ward", Icons.Default.LocationOn, focusRequesterList[2], focusRequesterList[3])
-                    OrderTextField("Specific address", tempAddress.value.concrete, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(concrete = newValue) }, "Specific address", Icons.Default.LocationOn, focusRequesterList[3])
-                } else {
+                if(product.category != "Food") {
                     OrderTextField("Country", tempAddress.value.country, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(country = newValue)}, "Country", Icons.Default.LocationOn, focusRequesterList[0], focusRequesterList[1])
-                    OrderTextField("City", tempAddress.value.city, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(city = newValue) }, "City", Icons.Default.LocationOn, focusRequesterList[1], focusRequesterList[2])
-                    OrderTextField("District", tempAddress.value.district, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(district = newValue) }, "District", Icons.Default.LocationOn, focusRequesterList[2], focusRequesterList[3])
-                    OrderTextField("Ward", tempAddress.value.ward, onValueChange = {newValue -> tempAddress.value = tempAddress.value.copy(ward = newValue) }, "Ward", Icons.Default.LocationOn, focusRequesterList[3], focusRequesterList[4])
-                    OrderTextField("Specific address", tempAddress.value.concrete, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(concrete = newValue) }, "Specific address", Icons.Default.LocationOn, focusRequesterList[4])
                 }
+                OrderTextField("City", tempAddress.value.city, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(city = newValue) }, "City", Icons.Default.LocationOn, focusRequesterList[0], focusRequesterList[1])
+                OrderTextField("District", tempAddress.value.district, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(district = newValue) }, "District", Icons.Default.LocationOn, focusRequesterList[1], focusRequesterList[2])
+                OrderTextField("Ward", tempAddress.value.ward, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(ward = newValue) }, "Ward", Icons.Default.LocationOn, focusRequesterList[2], focusRequesterList[3])
+                OrderTextField("Specific address", tempAddress.value.concrete, onValueChange = { newValue -> tempAddress.value = tempAddress.value.copy(concrete = newValue) }, "Specific address", Icons.Default.LocationOn, focusRequesterList[3])
             }
 
             Spacer(modifier = Modifier.height(12.dp))
